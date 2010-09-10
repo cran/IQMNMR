@@ -1,5 +1,5 @@
 identify_quantify <-
-function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index=0.001, maximal_vector_angle, DE, data_x, data_y, FIDL, FID.file, threads
+function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index=0.001, maximal_cosine_measure, DE, data_x, data_y, FIDL, FID.file, threads
 ){
 
     if (FIDL/2>floor(FIDL/2)) {
@@ -11,9 +11,12 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         print(paste("error !!  FIDL must be even"))
         q()
     }
+    maximal_vector_angle<-maximal_cosine_measure
     vector_angle<-maximal_vector_angle #0.7 #0.5236
     trunct_value<-20 
     SW<-SWH/SFO1
+    variance_frequency<-variance_frequency*SFO1
+    variance_frequency_interval<-variance_frequency_interval*SFO1
     n_noise<-SNR
     fid_length<-FIDL
     iteration_value<-convergence_index
@@ -13196,16 +13199,12 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         if (fi.threads==1) {
             mpi.spawn.Rslaves()
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
-            #list_value<-papply(as.list(c((length(central_d_freq)-301):197)), la.spec)
-#list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }  else {
             threads_b<-fi.threads-1
             mpi.spawn.Rslaves(nslaves=threads_b)
             mpi.remote.exec(mpi.get.processor.name())
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
-            #list_value<-papply(as.list(c((length(central_d_freq)-301):197)), la.spec)
-#list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }
 
@@ -13237,9 +13236,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         stop_signal_re<-relax.y[c(500:2000)]
         power_signal<-mean(Mod(stop_signal_re))
         rm(stop_signal_re)
-		#if (((down_freq_n>(-344))&(up_freq_n<(-324)))|((down_freq_n>(-1886.0))&(up_freq_n<(-1877.0)))) {
-#if ((down_freq_n<(-244.0))|(up_freq_n>(-224.0))) plist_2<-matrix(c(0,0,0,0), 1,4) else {
-        #if ((down_freq_n<(-1885.0))|(up_freq_n>(-1878.0))) plist_2<-matrix(c(0,0,0,0), 1,4) else {
+
 	    if (power_signal<=pre_stop_value) plist_2<-matrix(c(0,0,0,0), 1,4) else {
 		    pre_stop_value<-pre_stop_value/qsc
             zk_residual<-function(zk.f, zk.d, zk.y, zk.delt.time, zk.trunct, zk.DE, zk.m, zk.arg){
@@ -13249,6 +13246,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	            zk.Sli<-exp(outer(zk.x, zk.para))
 	            zk.complex.mod<-zk.m*exp(1i*zk.arg)
 	            residual.x<-zk.y-zk.Sli%*%zk.complex.mod
+	            if ( is.na(sum(Mod(residual.x))) ) residual.x<-rep(0, zk.length)
 	            return(residual.x)
 	        }
             fft_fk_dk<-function(cfd.d.range, cfd.y, cfd.delt.time, f_tol, d_tol,  cfd.down_freq_p, cfd.up_freq_p, cfd.down_freq_n, cfd.up_freq_n, cfd.central_freq_p, cfd.central_freq_n, cfd.relax.trunct, cfd.relax.DE, cfd.mean, cfd.sd) { 
@@ -13264,6 +13262,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
                     return(-(bn$coef[[2]]))
                 }
                 lm.cf.d<-lmd(lmd.y=cfd.y, lmd.delt=cfd.delt.time, lmd.trunct=cfd.relax.trunct, lmd.DE=cfd.relax.DE)
+                if (is.na(lm.cf.d)) { lm.cf.d<-0}
 
 	            cost_fk<-function(cf.f, cf.d, cf.y, cf.delt.time, cf.relax.trunct, cf.relax.DE, cfd.down_freq, cfd.up_freq, cf.dam, cf.dam2){                
                     if (cf.dam==1) {
@@ -13408,7 +13407,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	    while((abc>=mmmm)) {
 	        if (i==1) yk<-relax.y else yk<-zk_residual(zk.f=parameter[,1], zk.d=parameter[,2], zk.y=relax.y, zk.delt.time=delt_time, zk.trunct=relax.trunct, zk.DE=relax.DE, zk.m=parameter[,3], zk.arg=parameter[,4])
 	        parameter<-rbind(parameter, c(0,0,0,0))
-			parameter_op<-parameter
+			
 		iteration1<-iteration 
 	        j<-0
 	        fitness<-1000000
@@ -13466,7 +13465,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 		               adcv<-9
 		               pvalue<-0.05
 		           } else {
-			           adcv<-9
+			           adcv<-19
 			           pvalue<-0.5
 			       }
 	               abcd<-c(abcd, abc) 
@@ -13515,7 +13514,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 		           }
              	       }
                    }
-				parameter_op<-parameter
+				
                    j<-j+1
 	           hh<-j%%i
 	           if (hh==0) hh<-i
@@ -13584,7 +13583,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     parameter_t<-parameter_t[order(parameter_t[,1]),]
     signal_parameter<-parameter_t
     parameter<-parameter_t[,c(1, 3)]
-    #write.table(parameter_2, file="parameter_t.csv", quote=TRUE, sep=";", row.names=FALSE)
+    
     # 4 identification and quantification
     search_peak<-function(x, se.parameter, se.SWH, se.SW, se.vector_angle ){
         se.f_vector=x[[1]]
@@ -13596,8 +13595,8 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	se.SW=x[[7]]
 	se.vector_angle=x[[8]]
 	idddd<-x[[9]]
-        if (length(se.a_vector)>16) {
-	    pmax<-rev(order(abs(se.f_vector)))[1:16]
+        if (length(se.a_vector)>10) {
+	    pmax<-rev(order(abs(se.f_vector)))[1:10]
 	    se.3a_vector<-se.a_vector
 	    se.3f_vector<-se.f_vector
 	    se.a_vector<-se.a_vector[pmax]
@@ -13811,7 +13810,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     # 7 computer concentration
     result_data[,5]<-((result_data[,4]/result_data[,3])/((result_data[1,4]/result_data[1,3])/TSP_or_DSS_concentration))
     metabolite_concentration<-cbind(result_data[,c(1,2,5)],yh_m_5)
-    names(metabolite_concentration)<-c("ID", "name", "concentration", "angle")
+    names(metabolite_concentration)<-c("ID", "name", "concentration", "cosine similarity measure")
     names(signal_parameter)<-c("frequency", "damp factor", "amplitude", "phase")
     return_value<-metabolite_concentration  #list(signal_parameter, metabolite_concentration)
     return(return_value)

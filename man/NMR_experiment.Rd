@@ -22,10 +22,10 @@ This argument provides the information about the targeted metabolites' chemical 
 This argument provides the information about the targeted metabolites' molecular constitution and the experimental conditions of reference NMR spectra.  It must be specified by users or the code "data(lists_metabolites)".
 }
   \item{variance_frequency}{
-The resonance frequencies are not all the same as the reference frequencies, even for the same condition. This argument defines the variance of the resonance frequency.
+The resonance frequencies are not all the same as the reference frequencies, even for the same condition. This argument defines the variance of the resonance frequency.  The unit is ppm.
 }
   \item{variance_frequency_interval}{
-An important characteristic parameter in NMR is the frequency interval of the resonance frequencies. This argument defines the variance of the frequency intervals.
+An important characteristic parameter in NMR is the frequency interval of the resonance frequencies. This argument defines the variance of the frequency intervals.  The unit is ppm.
 }
   \item{SNR}{
 The signal to noise Ratio.  It is the SNR of the minimal resonance line of NMR spectra.  Note that this is peak SNR.

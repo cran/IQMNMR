@@ -12,7 +12,8 @@ function(
                          O1,
                          fid_save_path
                          ){
-
+    variance_frequency<-variance_frequency*SFO1
+	variance_frequency_interval<-variance_frequency_interval*SFO1
     signal_intensity_dss<-10*t.stimulated_metabolites_1[1,8]
 
     selected_metabolites<-t.stimulated_metabolites_1[which(t.stimulated_metabolites_1[,10]>0),]
