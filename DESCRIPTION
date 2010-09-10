@@ -2,7 +2,7 @@ Package: IQMNMR
 Type: Package
 Title: Identification and Quantification of Metabolites by Using 1D 1H
         NMR FID
-Version: 1.0.2
+Version: 1.0.3
 Date: 2010-09-10
 Author: XuSong
 Maintainer: Xu Song <songxu@zzu.edu.cn>
@@ -20,6 +20,6 @@ Description: Critical to metabolomics is the unambiguous identification
         absolute quantification of targeted metabolites.
 License: GPL (>= 2)
 LazyLoad: yes
-Packaged: 2011-04-05 15:10:34 UTC; PIPMDD
+Packaged: 2011-04-10 14:17:29 UTC; caleb
 Repository: CRAN
-Date/Publication: 2011-04-05 15:36:56
+Date/Publication: 2011-04-10 19:27:09

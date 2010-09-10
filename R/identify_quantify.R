@@ -13196,7 +13196,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         if (fi.threads==1) {
             mpi.spawn.Rslaves()
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
-            #list_value<-papply(as.list(c((length(central_d_freq)-10):400)), la.spec)
+            #list_value<-papply(as.list(c((length(central_d_freq)-301):197)), la.spec)
 #list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }  else {
@@ -13204,7 +13204,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
             mpi.spawn.Rslaves(nslaves=threads_b)
             mpi.remote.exec(mpi.get.processor.name())
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
-            #list_value<-papply(as.list(c((length(central_d_freq)-10):400)), la.spec)
+            #list_value<-papply(as.list(c((length(central_d_freq)-301):197)), la.spec)
 #list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }
@@ -13223,10 +13223,17 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         pre_stop_value<-relax.stop_value 
         pre_stop_value_0<-pre_stop_value 
         pre_stop_value<-re.n_noise*relax.list[[6]] 
+        if (re.n_noise>=1) {
+	        qsc<-re.n_noise
+	        esz<-1
+	    } else {
+		    qsc<-1
+		    esz<-re.n_noise
+		}
         sd.pre_stop_value<-relax.list[[7]]
         central_freq_p<-relax.list[[9]]
         central_freq_n<-relax.list[[10]]
-        mmmm<-0.1
+        mmmm<-1
         stop_signal_re<-relax.y[c(500:2000)]
         power_signal<-mean(Mod(stop_signal_re))
         rm(stop_signal_re)
@@ -13234,6 +13241,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 #if ((down_freq_n<(-244.0))|(up_freq_n>(-224.0))) plist_2<-matrix(c(0,0,0,0), 1,4) else {
         #if ((down_freq_n<(-1885.0))|(up_freq_n>(-1878.0))) plist_2<-matrix(c(0,0,0,0), 1,4) else {
 	    if (power_signal<=pre_stop_value) plist_2<-matrix(c(0,0,0,0), 1,4) else {
+		    pre_stop_value<-pre_stop_value/qsc
             zk_residual<-function(zk.f, zk.d, zk.y, zk.delt.time, zk.trunct, zk.DE, zk.m, zk.arg){
 	            zk.length<-length(zk.y)
 	            zk.x<-((1:zk.length)+zk.trunct-1)*zk.delt.time+zk.DE
@@ -13244,8 +13252,8 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	            return(residual.x)
 	        }
             fft_fk_dk<-function(cfd.d.range, cfd.y, cfd.delt.time, f_tol, d_tol,  cfd.down_freq_p, cfd.up_freq_p, cfd.down_freq_n, cfd.up_freq_n, cfd.central_freq_p, cfd.central_freq_n, cfd.relax.trunct, cfd.relax.DE, cfd.mean, cfd.sd) { 
-	            ty<-mean(Mod(cfd.y[c(100:2000)]))
-	            ty2<-3*cfd.mean#+2*cfd.sd 
+	            ty<-mean(Mod(cfd.y[c(1:100)])) # 100:2000
+	            ty2<-3*cfd.mean  #+2*cfd.sd   4
 	            con.damp2<-(ty2-ty)/ty2
 	            if (ty>ty2) {con.damp<-1} else {
 		            con.damp<-2
@@ -13260,9 +13268,14 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	            cost_fk<-function(cf.f, cf.d, cf.y, cf.delt.time, cf.relax.trunct, cf.relax.DE, cfd.down_freq, cfd.up_freq, cf.dam, cf.dam2){                
                     if (cf.dam==1) {
                         if (cf.d>=0) {
-                            w.h<- cf.d*0.45#*0.2
+                            w.h<- cf.d*0.45 #*0.2
                         } else w.h<- cf.d-5
-                    } else {w.h<-(-5*cf.dam2-1)}
+                    #} else {w.h<-(-5*cf.dam2-1)}
+                    } else {
+	                    if (cf.d>=5) {
+                            w.h<- cf.d*0.45 #cf.d*(0.45*(1-cf.dam2)) #-2
+                        } else w.h<-  cf.d-7
+	                }
                     cf.d<-cf.d-w.h
                     fid_function<-function(fi.dk, fi.deltk, fi.lengthk, fi.trunct, fi.DE){
                         x<-((1:fi.lengthk)+fi.trunct-1)*fi.deltk+fi.DE
@@ -13308,9 +13321,14 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	            cost_dk<-function(cf.d, cf.d2, cf.f, cf.y, cf.delt.time, cf.relax.trunct, cf.relax.DE, cf.dam, cf.dam2){ 
 		            if (cf.dam==1) {
                         if (cf.d2>=0) {
-                            w.h<- cf.d2*0.45#*0.35
+                            w.h<- cf.d2*0.45 #*0.45
                         } else {w.h<- cf.d2-5}
-                    } else {w.h<-(-5*cf.dam2-1)}		                
+                    #} else {w.h<-(-5*cf.dam2-1)}
+                    } else {
+	                    if (cf.d2>=5) {
+                            w.h<- cf.d2*0.45 #cf.d*(0.45*(1-cf.dam2)) #-2
+                        } else w.h<- cf.d2-7
+	                }		                
                     cf.d<-cf.d-w.h
                     fid_function<-function(fi.dk, fi.deltk, fi.lengthk, fi.trunct, fi.DE){
 		                x<-((1:fi.lengthk)+fi.trunct-1)*fi.deltk+fi.DE
@@ -13398,11 +13416,11 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	        fig1<-c(-1)
 	        aoc<-0
 	        abcd<-c(1,1,1,1,1,1)
-                pvalue<-0.001
+                pvalue<-0.05 #0.001
 	        while (fitness>iteration1) {
 	            h<-j%%i
 	            if (h==0) h<-i
-	            temp_para_f_d<-fft_fk_dk(cfd.d.range=d_range, cfd.y=yk, cfd.delt.time=delt_time, f_tol=tol_freq, d_tol=tol_damp,  cfd.down_freq_p=down_freq_p, cfd.up_freq_p=up_freq_p, cfd.down_freq_n=down_freq_n, cfd.up_freq_n=up_freq_n, cfd.central_freq_p=central_freq_p, cfd.central_freq_n=central_freq_n, cfd.relax.trunct=relax.trunct, cfd.relax.DE=relax.DE, cfd.mean=pre_stop_value, cfd.sd=sd.pre_stop_value)
+	            temp_para_f_d<-fft_fk_dk(cfd.d.range=d_range, cfd.y=yk, cfd.delt.time=delt_time, f_tol=tol_freq, d_tol=tol_damp,  cfd.down_freq_p=down_freq_p, cfd.up_freq_p=up_freq_p, cfd.down_freq_n=down_freq_n, cfd.up_freq_n=up_freq_n, cfd.central_freq_p=central_freq_p, cfd.central_freq_n=central_freq_n, cfd.relax.trunct=relax.trunct, cfd.relax.DE=relax.DE, cfd.mean=pre_stop_value/esz, cfd.sd=sd.pre_stop_value)
 	            if ((is.numeric(temp_para_f_d[[1]]))&(is.numeric(temp_para_f_d[[2]]))) {
 		        if ((temp_para_f_d[[2]]<30000)&&(temp_para_f_d[[2]]>=(-100))) {
 					    parameter_tep<-parameter
@@ -13434,7 +13452,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 
 	           if (h==i) {		
 	               residual_fid1<-zk_residual(zk.f=parameter[,1], zk.d=parameter[,2], zk.y=relax.y, zk.delt.time=delt_time, zk.trunct=relax.trunct, zk.DE=relax.DE, zk.m=parameter[,3], zk.arg=parameter[,4])
-	               stop_signal_residual<-residual_fid1[c(10:1500)]
+	               stop_signal_residual<-residual_fid1[c(1:1000)]
 	               fit_value_1<-mean(Mod(stop_signal_residual))
 	               rm(stop_signal_residual)		    
 	               fit_value_2<-c(fit_value_1, fit_value_2[1])
@@ -13442,7 +13460,15 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	               fig1<-c(fig, fig1[1])
 	               fitness<-abs(fit_value_2[1]-fit_value_2[2])
                        if ( ((fig1[1]*fig1[2])<0)) adc<-adc+1
-	               abc<-fit_value_1/(pre_stop_value*1)
+	               abc<-fit_value_1/(pre_stop_value/1)
+	               abcv<-fit_value_1/(pre_stop_value/esz)
+	               if (abcv>6) {
+		               adcv<-9
+		               pvalue<-0.05
+		           } else {
+			           adcv<-9
+			           pvalue<-0.5
+			       }
 	               abcd<-c(abcd, abc) 
 	               print(paste(date(), "---", i,"---", j, "(",down_freq_p,up_freq_p,")",  "(",down_freq_n, up_freq_n,")", adc, iter_odc, "p", pvalue, sep=" "))   
 	               print(paste("PTESS:", abc, " CI:", iteration1, fitness, " residual:", fit_value_1, "noise_ratio:", pre_stop_value_0/pre_stop_value))
@@ -13455,7 +13481,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 		               if ((is.numeric(y_abcd$p.value))&&(is.numeric(y_abcd$conf.int[[1]]))) {
 	                           print(paste(y_abcd$p.value,y_abcd$conf.int[[1]], "mean:",pre_stop_value, "sd:",sd.pre_stop_value))
 	                           if ( ( (y_abcd$p.value<=pvalue)&(y_abcd$conf.int[[1]]>0) )|(y_abcd$p.value>pvalue) ){                   
-		                       if (adc>9) {
+		                       if (adc>adcv) {
 		                           parameter<-parameter_min 
 		                           break
 		                       }
@@ -13472,7 +13498,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
                                if ((is.numeric(y_abcd$p.value))&&(is.numeric(y_abcd$conf.int[[1]]))) {
 	                            print(paste(y_abcd$p.value,y_abcd$conf.int[[1]], "mean:",pre_stop_value, "sd:",sd.pre_stop_value))	                       
 	                            if ( ( (y_abcd$p.value<=pvalue)&(y_abcd$conf.int[[1]]>0) )|(y_abcd$p.value>pvalue) ){               
-		                        if (adc>9) {
+		                        if (adc>adcv) {
 		                            parameter<-parameter_min 
 		                            break
 		                        }
@@ -13483,7 +13509,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	                            if (adc>100) break
 	                        }
 		           }
-		           if ( (j/i)>100 ) {
+		           if ( (j/i)>300 ) {
 		               parameter<-parameter_min
 		               break
 		           }
@@ -13499,8 +13525,8 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	        }
 	        odc<-c(abc, odc[1])
 	        if (odc[2]<=odc[1])  iter_odc<-iter_odc+1
-	        if (iter_odc>12) break
-		if (i>50) break
+	        if (iter_odc>36) break
+		if (i>60) break
 	        i<-i+1 
 	    } 
 	    parameter[,2]<-parameter[,2]
@@ -13558,7 +13584,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     parameter_t<-parameter_t[order(parameter_t[,1]),]
     signal_parameter<-parameter_t
     parameter<-parameter_t[,c(1, 3)]
-    write.table(parameter_2, file="parameter_t.csv", quote=TRUE, sep=";", row.names=FALSE)
+    #write.table(parameter_2, file="parameter_t.csv", quote=TRUE, sep=";", row.names=FALSE)
     # 4 identification and quantification
     search_peak<-function(x, se.parameter, se.SWH, se.SW, se.vector_angle ){
         se.f_vector=x[[1]]
