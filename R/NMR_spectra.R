@@ -8,7 +8,7 @@ function(SWH,
                       ){
     #read fid of bruker
     readfid<-function(r.SWH, r.pulse.time, r.number_fidbin, r.fidfile){
-         require(ff)
+         #require(ff)
          tpulse.time<-r.pulse.time   
          to.read = file(r.fidfile,"rb")  
          signal<-readBin(to.read, ,what="int",size=4, n=r.number_fidbin, endian = "little")
@@ -20,7 +20,8 @@ function(SWH,
          mediai<--mean(as.integer(rawI[c((3*length(rawR)/4):length(rawR))]),na.rm = TRUE)
          rawR<-rawR-mediar
          rawI<-rawI-mediai
-         fid.raw<-ff(1:((td/2)*2),vmode="double",dim=c((td/2),2), update=TRUE, overwrite=TRUE)
+         #fid.raw<-ff(1:((td/2)*2),vmode="double",dim=c((td/2),2), update=TRUE, overwrite=TRUE)]
+         fid.raw<-matrix(c(1:((td/2)*2)), (td/2), 2)
          fid.raw[,1]<-c(rawR)  
          fid.raw[,2]<-c(rawI)  
          rm("rawR","rawI")
@@ -29,7 +30,7 @@ function(SWH,
 
 
     fftshow<-function(f.swh, re.fid, im.fid, location.TMS, f.SFO1){
-        require(ff)
+        #require(ff)
 
         N<-length(re.fid); dwell.time<-1/f.swh; f.max<-f.swh
         dwell.f<-f.max/(4*N)  
@@ -60,7 +61,8 @@ function(SWH,
 
         rm("zero.re.fid","fft.shift")
  
-        freq.date<-ff(c(1:(m*4)), vmode="double",dim=c(m,4), update=TRUE, overwrite=TRUE)
+        #freq.date<-ff(c(1:(m*4)), vmode="double",dim=c(m,4), update=TRUE, overwrite=TRUE)
+        freq.date<-matrix(c(1:(m*4)), m, 4)
         freq.date[,1]<-Re(re.freq)
         freq.date[,2]<-Im(re.freq)
         freq.date[,3]<-f.set

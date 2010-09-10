@@ -13407,33 +13407,8 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	                    parameter[h,c(1,2)]<-temp_para_f_d[]                   
 	                    temp_para_mod_arg<-complex_amplitude_2(ca.f=parameter[h,1], ca.d=parameter[h,2], ca.y=yk, ca.delt.time=delt_time, ca.trunct=relax.trunct, ca.DE=relax.DE)
 	                    if ((is.numeric(temp_para_mod_arg[1,1]))&&(is.numeric(temp_para_mod_arg[1,2]))) {
-							if ((length(parameter[,1])>1)&(j>0)) {
-								p.p<-which.min(abs(parameter[c(-h),1]-parameter[h,1]))
-                                if (p.p>=h) p.p=p.p+1
-                                if (abs(parameter[p.p,1]-parameter[h,1])<2) {
-									pcor.v<-cor.test(c(parameter[p.p,c(1,2,3)]), c(parameter[h,c(1,2,3)]))
-									if (is.na(pcor.v$p.value[])) {
-										parameter[h,c(3,4)]<-temp_para_mod_arg[]
-									} else {
-										if (pcor.v$p.value[]<0.2) {
-											residual_fid1_tep<-zk_residual(zk.f=parameter_tep[,1], zk.d=parameter_tep[,2], zk.y=relax.y, zk.delt.time=delt_time, zk.trunct=relax.trunct, zk.DE=relax.DE, zk.m=parameter_tep[,3], zk.arg=parameter_tep[,4]) #c(h,p.p)
-											stop_signal_residual_tep<-residual_fid1_tep[c(1:1500)]
-											fit_value_1_tep<-mean(Mod(stop_signal_residual_tep))
-											parameter[h,c(3,4)]<-temp_para_mod_arg[]
-											residual_fid1_tep0<-zk_residual(zk.f=parameter[,1], zk.d=parameter[,2], zk.y=relax.y, zk.delt.time=delt_time, zk.trunct=relax.trunct, zk.DE=relax.DE, zk.m=parameter[,3], zk.arg=parameter[,4])
-											stop_signal_residual_tep0<-residual_fid1_tep0[c(1:1500)]
-											fit_value_1_tep0<-mean(Mod(stop_signal_residual_tep0))
-											if (fit_value_1_tep0>fit_value_1_tep)  parameter[h,]<-parameter_tep[h,]
-										} else {
-											parameter[h,c(3,4)]<-temp_para_mod_arg[]
-										}
-									}
-                                } else {
-                                    parameter[h,c(3,4)]<-temp_para_mod_arg[]
-                                }
-							} else {
-								parameter[h,c(3,4)]<-temp_para_mod_arg[]
-							}			    } else {
+							parameter[h,c(3,4)]<-temp_para_mod_arg[]
+						} else {
 	                        parameter[h,c(1,2)]<-c(0, 0) 
 	                        parameter[h,c(3,4)]<-c(0, 1) 
 	                    }
