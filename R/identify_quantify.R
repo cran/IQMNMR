@@ -13196,6 +13196,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         if (fi.threads==1) {
             mpi.spawn.Rslaves()
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
+            #list_value<-papply(as.list(c((length(central_d_freq)-10):400)), la.spec)
 #list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }  else {
@@ -13203,6 +13204,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
             mpi.spawn.Rslaves(nslaves=threads_b)
             mpi.remote.exec(mpi.get.processor.name())
             list_value<-papply(as.list(c((length(central_d_freq)-10):10)), la.spec)
+            #list_value<-papply(as.list(c((length(central_d_freq)-10):400)), la.spec)
 #list_value<-papply(as.list(c(198,462, 463, 464)), la.spec)
             mpi.close.Rslaves()
         }
@@ -13224,7 +13226,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
         sd.pre_stop_value<-relax.list[[7]]
         central_freq_p<-relax.list[[9]]
         central_freq_n<-relax.list[[10]]
-        mmmm<-1 
+        mmmm<-0.1
         stop_signal_re<-relax.y[c(500:2000)]
         power_signal<-mean(Mod(stop_signal_re))
         rm(stop_signal_re)
@@ -13257,9 +13259,9 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 
 	            cost_fk<-function(cf.f, cf.d, cf.y, cf.delt.time, cf.relax.trunct, cf.relax.DE, cfd.down_freq, cfd.up_freq, cf.dam, cf.dam2){                
                     if (cf.dam==1) {
-                        if (cf.d>0) {
-                            w.h<- cf.d*0.8
-                        } else w.h<- cf.d*1.2
+                        if (cf.d>=0) {
+                            w.h<- cf.d*0.45#*0.2
+                        } else w.h<- cf.d-5
                     } else {w.h<-(-5*cf.dam2-1)}
                     cf.d<-cf.d-w.h
                     fid_function<-function(fi.dk, fi.deltk, fi.lengthk, fi.trunct, fi.DE){
@@ -13305,9 +13307,9 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 
 	            cost_dk<-function(cf.d, cf.d2, cf.f, cf.y, cf.delt.time, cf.relax.trunct, cf.relax.DE, cf.dam, cf.dam2){ 
 		            if (cf.dam==1) {
-                        if (cf.d2>0) {
-                            w.h<- cf.d2*0.8
-                        } else {w.h<- cf.d2*1.2}
+                        if (cf.d2>=0) {
+                            w.h<- cf.d2*0.45#*0.35
+                        } else {w.h<- cf.d2-5}
                     } else {w.h<-(-5*cf.dam2-1)}		                
                     cf.d<-cf.d-w.h
                     fid_function<-function(fi.dk, fi.deltk, fi.lengthk, fi.trunct, fi.DE){
@@ -13556,7 +13558,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     parameter_t<-parameter_t[order(parameter_t[,1]),]
     signal_parameter<-parameter_t
     parameter<-parameter_t[,c(1, 3)]
-    #write.table(parameter_2, file="parameter_t.csv", quote=TRUE, sep=";", row.names=FALSE)
+    write.table(parameter_2, file="parameter_t.csv", quote=TRUE, sep=";", row.names=FALSE)
     # 4 identification and quantification
     search_peak<-function(x, se.parameter, se.SWH, se.SW, se.vector_angle ){
         se.f_vector=x[[1]]
