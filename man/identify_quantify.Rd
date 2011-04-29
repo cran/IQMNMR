@@ -7,7 +7,7 @@ Identification And Quantification Of Metabolites
 This function is used to identify and quantify metabolites from 1D 1H NMR FID.  Before using this function, users must give two data which are names as space_x and lists_metabolites.  These two data's paradigm can be obtained by type data(space_x) and data(lists_metabolites).  These two data describe the character of targeted metabolites.  These information can be obtained from http://www.bmrb.wisc.edu/ and http://mmcd.nmrfam.wisc.edu/.  
 }
 \usage{
-identify_quantify(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index, maximal_cosine_measure, DE, data_x, data_y, FIDL, FID.file, threads)
+identify_quantify(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index, maximal_cosine_measure, DE, data_x, data_y, FIDL, FID.file, threads, maximal_peak_number)
 }
 
 \arguments{
@@ -64,6 +64,9 @@ This argument is the file path of FID.
 }
   \item{threads}{
 This parameter is the unit of processing that can be scheduled by an operating system.  Its value should be assigned according to the clusters of multicore multithreaded computer or multiple computers.
+}
+  \item{maximal_peak_number}{
+This parameter is maximal peak number used for similarity searching algorithm.  The computing time is an exponential function of the number of peak uesd for similarity searching algorithm.  Therefore, the maximal peak number used for similarity searching algorithm should be given according to the performance of computer.  In our experiments, its value is set at 16.
 }
 }
 \details{

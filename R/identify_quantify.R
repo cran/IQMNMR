@@ -1,5 +1,5 @@
 identify_quantify <-
-function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index=0.001, maximal_cosine_measure, DE, data_x, data_y, FIDL, FID.file, threads
+function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_frequency_interval, TD, AQ, SWH, SFO1, O1, SNR, convergence_index=0.001, maximal_cosine_measure, DE, data_x, data_y, FIDL, FID.file, threads, maximal_peak_number
 ){
 
     if (FIDL/2>floor(FIDL/2)) {
@@ -13595,8 +13595,9 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 	se.SW=x[[7]]
 	se.vector_angle=x[[8]]
 	idddd<-x[[9]]
-        if (length(se.a_vector)>10) {
-	    pmax<-rev(order(abs(se.f_vector)))[1:10]
+	se.maximal_peak_number<-x[[10]]
+        if (length(se.a_vector)>se.maximal_peak_number) {
+	    pmax<-rev(order(abs(se.f_vector)))[1:se.maximal_peak_number]
 	    se.3a_vector<-se.a_vector
 	    se.3f_vector<-se.f_vector
 	    se.a_vector<-se.a_vector[pmax]
@@ -13772,7 +13773,7 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
 
     para_vector<-NULL
     for (i in 1:length(recycle_list)) {
-        para_vector[[i]]<-list(data_x_2[which(data_x_2[,1]==recycle_list[i]),2], data_x_2[which(data_x_2[,1]==recycle_list[i]),3], c(internal_difference), c(variance_frequency), parameter,  SWH, SW, vector_angle, recycle_list[i])
+        para_vector[[i]]<-list(data_x_2[which(data_x_2[,1]==recycle_list[i]),2], data_x_2[which(data_x_2[,1]==recycle_list[i]),3], c(internal_difference), c(variance_frequency), parameter,  SWH, SW, vector_angle, recycle_list[i], maximal_peak_number)
     }  
 
     # Load the R MPI package if it is not already loaded.
