@@ -18,10 +18,10 @@ The internal standard used in sample. 1 represents TSP, 2 represents DSS.
 The concentration of internal standard used in sample. The unit is micromoles/L or moles/L.
 }
   \item{variance_frequency}{
-The resonance frequencies are not all the same as the reference frequencies, even for the same condition. This argument defines the variance of the resonance frequency. the chemical shift average variation of Madison Metabolomics Consortium Database is 0.05ppm.
+The resonance frequencies are not all the same as the reference frequencies, even for the same condition. This argument defines the variance of the resonance frequency. Its unit is ppm. The chemical shift average variation of Madison Metabolomics Consortium Database is 0.05ppm.
 }
   \item{variance_frequency_interval}{
-An important characteristic parameter in NMR is the frequency interval of the resonance frequencies. This argument defines the variance of the frequency intervals.  in common with general situations, its value is set at 0.0075ppm.
+An important characteristic parameter in NMR is the frequency interval of the resonance frequencies. This argument defines the variance of the frequency intervals.  Its unit is ppm. In common with general situations, its value is set at 0.0075ppm.
 }
   \item{TD}{
 Time domain data size of sample. It is an NMR experiment parameter. Please refer to BRUKER NMR Guide.

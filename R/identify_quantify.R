@@ -13585,176 +13585,221 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     parameter<-parameter_t[,c(1, 3)]
     
     # 4 identification and quantification
-    search_peak<-function(x, se.parameter, se.SWH, se.SW, se.vector_angle ){
+    search_peak<-function(x){
         se.f_vector=x[[1]]
-	se.a_vector=x[[2]]
-	se.internal_difference=x[[3]]
-	se.variance_frequency=x[[4]]
-	se.parameter=x[[5]]
-	se.SWH=x[[6]]
-	se.SW=x[[7]]
-	se.vector_angle=x[[8]]
-	idddd<-x[[9]]
-	se.maximal_peak_number<-x[[10]]
+        se.a_vector=x[[2]]
+        se.internal_difference=x[[3]]
+        se.variance_frequency=x[[4]]
+        se.parameter=x[[5]]
+        se.SWH=x[[6]]
+        se.SW=x[[7]]
+        se.vector_angle=x[[8]]
+        idddd<-x[[9]]
+        se.threads<-x[[10]]
+        se.maximal_peak_number<-x[[11]]
         if (length(se.a_vector)>se.maximal_peak_number) {
-	    pmax<-rev(order(abs(se.f_vector)))[1:se.maximal_peak_number]
-	    se.3a_vector<-se.a_vector
-	    se.3f_vector<-se.f_vector
-	    se.a_vector<-se.a_vector[pmax]
-	    se.f_vector<-se.f_vector[pmax]
-	}  else {
-	    se.3a_vector<-se.a_vector
-	    se.3f_vector<-se.f_vector
-	}
-	print(paste("      ******")) 
-	print(paste("      ******"))  
-	print(paste("      ******"))
-	print(paste("ID =", idddd ," start ", "--------------------------", date()))
-        #max_a.position<-sample(c(1:length(se.a_vector)), 1)
-	max_a.position<-which.max(se.a_vector)
-	base_f<-se.f_vector[max_a.position]
-	base_a<-se.a_vector[max_a.position]
-	df_f_vector<-se.f_vector-base_f
-	reference_range<-0.1*(se.SWH/se.SW)
-
-	if (length(se.f_vector)==1) {
-	    pp1<-which((((se.parameter[,1])>=(base_f-reference_range))&((se.parameter[,1])<=(base_f+reference_range))))
-	    plist_1<-se.parameter[which((((se.parameter[,1])>=(base_f-reference_range))&((se.parameter[,1])<=(base_f+reference_range)))),]
-
-	    if (length(pp1)>1) candidate_base_parameter<-plist_1 else {
-	        if (length(pp1)==1) candidate_base_parameter<-matrix(plist_1, 1,2) else {
-		    candidate_base_parameter<-matrix(c(base_f,0), 1,2)
-		}
-	    }
-	    rm("pp1", "plist_1")
-	} else {
-	    pp1<-which((((se.parameter[,1])>=(base_f-se.variance_frequency))&((se.parameter[,1])<=(base_f+se.variance_frequency))))
-	    plist_1<-se.parameter[which((((se.parameter[,1])>=(base_f-se.variance_frequency))&((se.parameter[,1])<=(base_f+se.variance_frequency)))),]
-	    if (length(pp1)>1) candidate_base_parameter<-plist_1 else {
-	        if (length(pp1)==1) candidate_base_parameter<-matrix(plist_1, 1,2) else {
-		    candidate_base_parameter<-matrix(c(base_f,0), 1,2)
-		}
-	    }
-	    rm("pp1", "plist_1")
-	}
-
-	a_alpha<-function(x,y){ 
-	    if (mean(x)==0) alpha1<-0 else alpha1<-(sum(x*y))/(sqrt(sum(x*x))*sqrt(sum(y*y)))  
-	    if (alpha1>1) alpha1<-round(alpha1)
-	    alpha<-acos(alpha1)
-	    return(alpha)
-	}
-
-	good_a_vector_2<-NULL
-	for (i in 1:length(candidate_base_parameter[,1])) {
-	    se.f_vector_correct<-candidate_base_parameter[i,1]+df_f_vector
-	    j<-1
-	    list_candidate<-NULL
-	    for (j in 1:length(se.f_vector)) {
-	        pp1<-which((((se.parameter[,1])>=(se.f_vector_correct[j]-se.internal_difference))&((se.parameter[,1])<=(se.f_vector_correct[j]+se.internal_difference))))
-	        plist_1<-se.parameter[which((((se.parameter[,1])>=(se.f_vector_correct[j]-se.internal_difference))&((se.parameter[,1])<=(se.f_vector_correct[j]+se.internal_difference)))),]
-            
-	        if (length(pp1)>1) {
-	            candidate_correct_parameter<-plist_1
-	        } else {
-		    if (length(pp1)==1) { 
-		        candidate_correct_parameter<-matrix(plist_1, 1,2) 
-		    }else {
-		        candidate_correct_parameter<-matrix(c(se.f_vector_correct[j],0), 1,2)
-	            }
-	        }
-	        rm("pp1", "plist_1")             
-	        list_candidate[[j]]<-list(candidate_correct_parameter[,2])
-	    }
-
-	    high_para<-1; factor_para<-NULL
-	    for (j in 1:length(se.f_vector)) {
-	        high_para<-high_para*length(list_candidate[[j]][[1]])
-	        factor_para<-c(factor_para, length(list_candidate[[j]][[1]]))
-	    }
-	    print(high_para)
-	    #t_goodness_value<-ff(0, vmode="double", dim=c(1, high_para), update=TRUE, overwrite=TRUE)
-	    t_goodness_value<-matrix(0, 1, high_para)
-	    for (ij in 1:high_para) {
-	        matrix_asd<-matrix(0, 1, length(se.f_vector))
-	        for (j in 1:length(se.f_vector)) {
-	        each_j<-high_para/(prod(factor_para[1:j]))
-	        factor_para[j]
-	        vv<-ij%%(each_j*factor_para[j])
-	        if (vv==0) vv<-(each_j*factor_para[j])
-	            mm<-list_candidate[[j]][[1]]
-	            matrix_asd[1,j]<-mm[ceiling(vv/each_j)]
-	        }
-	        cvp<- matrix_asd[1,]
-	        svp<-se.a_vector
-	        t_goodness_value[1,ij]<-a_alpha(cvp,svp)
-	    }           
-	    p_matrix_asd<-which.min(t_goodness_value[1,])
-	    rm(t_goodness_value)
-	    matrix_asd<-matrix(0, 1, length(se.f_vector))
-	    for (j in 1:length(se.f_vector)) {
-	        each_j<-high_para/(prod(factor_para[1:j]))
-	        factor_para[j]
-	        vv<-p_matrix_asd%%(each_j*factor_para[j])
-	        if (vv==0) vv<-(each_j*factor_para[j])
-	        mm<-list_candidate[[j]][[1]]
-	        matrix_asd[1,j]<-mm[ceiling(vv/each_j)]
-	    }
-
-	    good_a_vector_2<-rbind(good_a_vector_2, matrix_asd[1,])
-	    rm(matrix_asd)
+            #pmax<-sample(c(1:length(se.f_vector)), 20, replace=FALSE)
+            pmax<-rev(order(abs(se.f_vector)))[1:se.maximal_peak_number]
+            #pmax<pl
+            se.3a_vector<-se.a_vector
+            se.3f_vector<-se.f_vector
+            se.a_vector<-se.a_vector[pmax]
+            se.f_vector<-se.f_vector[pmax]
+        }  else {
+            se.3a_vector<-se.a_vector
+            se.3f_vector<-se.f_vector
         }
-
-	if (length(good_a_vector_2[1,])==1) {
-	    orderate<-good_a_vector_2[which.max(good_a_vector_2[,1]),]
-	    angle_1<-0.0001
-	} else {
-	    goodness_value<-NULL
-	    for (k in 1:length(good_a_vector_2[,1])) {
-	        goodness_value<-c(goodness_value, a_alpha(good_a_vector_2[k,],se.a_vector))     
-	    }
-	    ind_orderate<-good_a_vector_2[which.min(goodness_value),]
-	    cv<- ind_orderate
-	    sv<-se.a_vector
-	    if (length(cv)>2) {
-	        pva<-0.0001
-		while (pva<0.05) {
-		    yu<-cv/sv
-		    require(outliers)
-		    chitest<-chisq.out.test(yu)
-		    if (is.na(chitest$p.value)) {
-	                break
-	            } else {
-		        if (chitest$p.value<0.05) {
-	                    pq2<-which(yu==outlier(yu))
-	                    cv<- cv[-c(pq2)]
-			    sv<-sv[-c(pq2)]
-	                } 
-	                pva<-chitest$p.value
-	            }
-	        } 
-	    }  
-	    orderate<-(sum(cv)/sum(sv))*sum(se.3a_vector)
-            if (is.na(orderate)) orderate<-0.0001
-	    angle_1<-a_alpha(cv,sv) #min(goodness_value)
-	    if (angle_1>se.vector_angle) {
-	        orderate<-0.0001 
-		 angle_1<-pi/2
-	    }
-	}		      
-	print(paste("ID =", idddd, " stop ", "--------------------------", date()))
         print(paste("      ******")) 
-	print(paste("      ******"))  
-	print(paste("      ******"))
-	return(c(orderate, angle_1))
+        print(paste("      ******"))  
+        print(paste("      ******"))
+        print(paste("ID =", idddd ," start ", "--------------------------", date()))
+        a_alpha<-function(x,y){ 
+            if (mean(x)==0) alpha1<-0 else alpha1<-(sum(x*y))/(sqrt(sum(x*x))*sqrt(sum(y*y)))  
+            if (alpha1>1) alpha1<-round(alpha1)
+            alpha<-acos(alpha1)
+            return(alpha)
+        }
+        similarity<-function(si_ij, si_se.f_vector, si_se.a_vector, si_high_para, si_factor_para, si_list_candidate){
+            matrix_asd<-matrix(0, 1, length(si_se.f_vector))
+            for (j in 1:length(si_se.f_vector)) {
+                each_j<-si_high_para/(prod(si_factor_para[1:j]))
+                vv<-si_ij%%(each_j*si_factor_para[j])
+                if (vv==0) vv<-(each_j*si_factor_para[j])
+                mm<-si_list_candidate[[j]][[1]]
+                matrix_asd[1,j]<-mm[ceiling(vv/each_j)]
+            }
+            si_a_alpha<-function(x,y){ 
+                if (mean(x)==0) alpha1<-0 else alpha1<-(sum(x*y))/(sqrt(sum(x*x))*sqrt(sum(y*y)))  
+                if (alpha1>1) alpha1<-round(alpha1)
+                alpha<-acos(alpha1)
+                return(alpha)
+            }
+            cvp<- matrix_asd[1,]
+            svp<-si_se.a_vector
+            t_1<-si_a_alpha(cvp,svp)
+            t_2<-sum(cvp)
+            print(paste(t_1, t_2, si_ij, date())  )          
+            return(c(t_1, t_2, si_ij))
+        } 
+        similarity_2<-function(si_ij, si_se.f_vector, si_se.a_vector, si_high_para, si_factor_para, si_list_candidate){
+            matrix_asd<-matrix(0, 1, length(si_se.f_vector))
+            for (j in 1:length(si_se.f_vector)) {
+                each_j<-si_high_para/(prod(si_factor_para[1:j]))
+                vv<-si_ij%%(each_j*si_factor_para[j])
+                if (vv==0) vv<-(each_j*si_factor_para[j])
+                mm<-si_list_candidate[[j]][[1]]
+                matrix_asd[1,j]<-mm[ceiling(vv/each_j)]
+            }
+            si_a_alpha<-function(x,y){ 
+                if (mean(x)==0) alpha1<-0 else alpha1<-(sum(x*y))/(sqrt(sum(x*x))*sqrt(sum(y*y)))  
+                if (alpha1>1) alpha1<-round(alpha1)
+                alpha<-acos(alpha1)
+                return(alpha)
+            }
+            cvp<- matrix_asd[1,]	              
+            return(cvp)
+        }    
+        #max_a.position<-sample(c(1:length(se.a_vector)), 1)
+        max_a.position<-which.max(se.a_vector)
+        base_f<-se.f_vector[max_a.position]
+        base_a<-se.a_vector[max_a.position]
+        df_f_vector<-se.f_vector-base_f
+        reference_range<-0.1*(se.SWH/se.SW)
+        if (length(se.f_vector)==1) {
+            pp1<-which((((se.parameter[,1])>=(base_f-reference_range))&((se.parameter[,1])<=(base_f+reference_range))))
+            plist_1<-se.parameter[which((((se.parameter[,1])>=(base_f-reference_range))&((se.parameter[,1])<=(base_f+reference_range)))),]
+            if (length(pp1)>1) candidate_base_parameter<-plist_1 else {
+                if (length(pp1)==1) candidate_base_parameter<-matrix(plist_1, 1,2) else {
+                    candidate_base_parameter<-matrix(c(base_f,0), 1,2)
+                }
+            }
+            rm("pp1", "plist_1")
+        } else {
+            pp1<-which((((se.parameter[,1])>=(base_f-se.variance_frequency))&((se.parameter[,1])<=(base_f+se.variance_frequency))))
+            plist_1<-se.parameter[which((((se.parameter[,1])>=(base_f-se.variance_frequency))&((se.parameter[,1])<=(base_f+se.variance_frequency)))),]
+            if (length(pp1)>1) candidate_base_parameter<-plist_1 else {
+                if (length(pp1)==1) candidate_base_parameter<-matrix(plist_1, 1,2) else {
+                    candidate_base_parameter<-matrix(c(base_f,0), 1,2)
+                }
+            }
+            rm("pp1", "plist_1")
+        }
+        good_a_vector_2<-NULL
+        for (i in 1:length(candidate_base_parameter[,1])) {
+            se.f_vector_correct<-candidate_base_parameter[i,1]+df_f_vector
+            j<-1
+            list_candidate<-NULL
+            for (j in 1:length(se.f_vector)) {
+                pp1<-which((((se.parameter[,1])>=(se.f_vector_correct[j]-se.internal_difference))&((se.parameter[,1])<=(se.f_vector_correct[j]+se.internal_difference))))
+                plist_1<-se.parameter[which((((se.parameter[,1])>=(se.f_vector_correct[j]-se.internal_difference))&((se.parameter[,1])<=(se.f_vector_correct[j]+se.internal_difference)))),]
+                if (length(pp1)>1) {
+                    candidate_correct_parameter<-plist_1
+                } else {
+                    if (length(pp1)==1) { 
+                        candidate_correct_parameter<-matrix(plist_1, 1,2) 
+                    }else {
+                        candidate_correct_parameter<-matrix(c(se.f_vector_correct[j],0), 1,2)
+                    }
+                }
+                rm("pp1", "plist_1")             
+                list_candidate[[j]]<-list(candidate_correct_parameter[,2])
+            }
+            high_para<-1; factor_para<-NULL
+            for (j in 1:length(se.f_vector)) {
+                high_para<-high_para*length(list_candidate[[j]][[1]])
+                factor_para<-c(factor_para, length(list_candidate[[j]][[1]]))
+            }
+            print(high_para)   		          
+            simi_search<-function(x){
+                re_vb<-similarity(si_ij=x[], si_se.f_vector=se.f_vector, si_se.a_vector=se.a_vector, si_high_para=high_para, si_factor_para=factor_para, si_list_candidate=list_candidate)
+                return(re_vb)
+            }	
+            if (se.threads<3) {
+                list_value_s<-lapply(as.list(c(1:high_para)), simi_search)
+            } 
+            else {
+                if (high_para<(se.threads-1)) {
+                     se.threads_1<-(high_para+1)
+	                 if (!is.loaded("mpi_initialize")) { require("Rmpi") }
+	                 require(papply)
+	                 threads_b<-se.threads_1-1
+	                 mpi.spawn.Rslaves(nslaves=threads_b)
+	                 mpi.remote.exec(mpi.get.processor.name())
+	                 list_value_s<-papply(as.list(c(1:high_para)), simi_search)
+	                 mpi.close.Rslaves()
+	            
+                } else {
+                     se.threads_1<-se.threads
+	                 if (!is.loaded("mpi_initialize")) { require("Rmpi") }
+	                 require(papply)
+	                 threads_b<-se.threads_1-1
+	                 mpi.spawn.Rslaves(nslaves=threads_b)
+	                 mpi.remote.exec(mpi.get.processor.name())
+	                 list_value_s<-papply(as.list(c(1:high_para)), simi_search)
+	                 mpi.close.Rslaves()
+                }
+            }
+
+            t_goodness_value<-matrix(unlist(list_value_s), 3, high_para)
+            if (length(se.a_vector)==1) {
+                p_matrix_asd<-which.max(t_goodness_value[2,])
+            } else {
+                p_matrix_asd<-which.min(t_goodness_value[1,])
+            }	          
+            
+            matrix_asd_2<-similarity_2(si_ij=t_goodness_value[3,p_matrix_asd], si_se.f_vector=se.f_vector, si_se.a_vector=se.a_vector, si_high_para=high_para, si_factor_para=factor_para, si_list_candidate=list_candidate)
+            good_a_vector_2<-rbind(good_a_vector_2, matrix_asd_2)	          
+        }
+        if (length(good_a_vector_2[1,])==1) {
+            orderate<-good_a_vector_2[which.max(good_a_vector_2[,1]),]
+            angle_1<-0
+        } else {
+            goodness_value<-NULL
+            for (k in 1:length(good_a_vector_2[,1])) {
+            goodness_value<-c(goodness_value, a_alpha(good_a_vector_2[k,],se.a_vector))
+            }
+            ind_orderate<-good_a_vector_2[which.min(goodness_value),]
+            angle_1<-min(goodness_value)
+            cv<- ind_orderate
+            sv<-se.a_vector
+            if (length(cv)>2) {
+                pva<-0.0001
+                while (pva<0.05) {
+                    yu<-cv/sv
+                    require(outliers)
+                    chitest<-chisq.out.test(yu)
+                    if (is.na(chitest$p.value)) {
+                        break
+                    } else {
+                        if (chitest$p.value<0.05) {
+                            pq2<-which(yu==outlier(yu))
+                            cv<- cv[-c(pq2)]
+                            sv<-sv[-c(pq2)]
+                        } 
+                        pva<-chitest$p.value
+                    }
+                } 
+            }  
+            orderate<-(sum(cv)/sum(sv))*sum(se.3a_vector)
+            if (is.na(orderate)) orderate<-0
+            #angle_1<-a_alpha(cv,sv) #min(goodness_value)
+            if (angle_1>se.vector_angle) {
+                orderate<-0 
+                angle_1<-pi/2
+            }
+         }
+         print(paste("ID =", idddd, " stop ", "--------------------------", date()))
+         print(paste("      ******")) 
+         print(paste("      ******"))  
+         print(paste("      ******"))
+         return(c(orderate, angle_1))
     }
 
     space_of_gene_x_dss<-c(0, 0, 1)
     if (TSP_or_DSS==1){
         space_of_gene_x_dss<-c(0, -0.2, 1)
-	data_x<-rbind(space_of_gene_x_dss,data_x)
+        data_x<-rbind(space_of_gene_x_dss,data_x)
     } else data_x<-rbind(space_of_gene_x_dss,data_x)    
-
     lists_tsp<-data.frame(0, "TSP", "TSP", data_y[1,4], data_y[1,5], data_y[1,6], data_y[1,7], 9, "C8 H18 O2 Si")
     names(lists_tsp)<-names(data_y)
     lists_dss<-data.frame(0, "DSS", "DSS", data_y[1,4], data_y[1,5], data_y[1,6], data_y[1,7], 9, "C6 H16 O3 S Si")
@@ -13762,43 +13807,26 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     if (TSP_or_DSS==1) {
         data_y<-rbind(lists_tsp, data_y)
     } else data_y<-rbind(lists_dss, data_y)    
-
     recycle_list<-data_y[,1]
-
     result_data<-data.frame(data_y[,1:2], data_y[,8],  rep(0, length(data_y[,1])), rep(0, length(data_y[,1])))
     names(result_data)<-c("ID", "name", "effective_H", "peak_area", "concentration")
-
     data_x_2<-data_x
     data_x_2[,2]<-data_x[,2]*SWH/SW-abs(O1)
-
     para_vector<-NULL
     for (i in 1:length(recycle_list)) {
-        para_vector[[i]]<-list(data_x_2[which(data_x_2[,1]==recycle_list[i]),2], data_x_2[which(data_x_2[,1]==recycle_list[i]),3], c(internal_difference), c(variance_frequency), parameter,  SWH, SW, vector_angle, recycle_list[i], maximal_peak_number)
-    }  
-
+        para_vector[[i]]<-list(data_x_2[which(data_x_2[,1]==recycle_list[i]),2], data_x_2[which(data_x_2[,1]==recycle_list[i]),3], c(internal_difference), c(variance_frequency), parameter,  SWH, SW, vector_angle, recycle_list[i], threads, maximal_peak_number)
+    }
     # Load the R MPI package if it is not already loaded.
     ppk<-2
     id_array<-array(1, c(length(result_data[,4]),2,ppk)) 
     #for (ik in 1:ppk) {
-    print(paste(date(),"---", "Please wait for identification and quantification !",sep=" ")) 
-    if (!is.loaded("mpi_initialize")) { require("Rmpi") }   
-    require(papply) 
-    if (threads<3) {threads_b<-threads
-        mpi.spawn.Rslaves()
-        yh<-papply(para_vector, search_peak)
-        mpi.close.Rslaves()
-    }  else { threads_b<-threads-1
-        mpi.spawn.Rslaves(nslaves=threads_b)
-        mpi.remote.exec(mpi.get.processor.name())
-        yh<-papply(para_vector, search_peak)
-        mpi.close.Rslaves()
-    }
     yh_m<-NULL
     for( i in 1:length(recycle_list)) {
-        yh_m<-rbind(yh_m, yh[[i]])	
+        yh<-search_peak(para_vector[[i]])
+        yh_m<-rbind(yh_m, yh)	
     }
     id_array[,,1]<-yh_m[]
-    #}
+#}
     id_array[,,2]<-yh_m[]
     yh_m_1<-id_array[,1,]*(pi/2-id_array[,2,])
     yh_m_2<-apply(yh_m_1, 1, sum)
@@ -13807,12 +13835,12 @@ function(TSP_or_DSS, TSP_or_DSS_concentration, variance_frequency, variance_freq
     result_data[,4]<-yh_m_4
     yh_m_5<-apply(id_array[,2,]*(pi/2-id_array[,2,]), 1, sum)/yh_m_3
     #yh_m_5<-pi/2-apply((pi/2-id_array[,2,]), 1, sum)/ppk
-
     # 7 computer concentration
     result_data[,5]<-((result_data[,4]/result_data[,3])/((result_data[1,4]/result_data[1,3])/TSP_or_DSS_concentration))
     metabolite_concentration<-cbind(result_data[,c(1,2,5)],yh_m_5)
     names(metabolite_concentration)<-c("ID", "name", "concentration", "cosine similarity measure")
     names(signal_parameter)<-c("frequency", "damp factor", "amplitude", "phase")
+
     return_value<-metabolite_concentration  #list(signal_parameter, metabolite_concentration)
     return(return_value)
 }
